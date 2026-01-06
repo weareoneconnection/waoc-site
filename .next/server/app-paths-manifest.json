@@ -1,0 +1,17 @@
+{
+  "/_not-found/page": "app/_not-found/page.js",
+  "/page": "app/page.js",
+  "/[locale]/community/page": "app/[locale]/community/page.js",
+  "/[locale]/connect/page": "app/[locale]/connect/page.js",
+  "/[locale]/get-started/meditation/page": "app/[locale]/get-started/meditation/page.js",
+  "/[locale]/get-started/nft/page": "app/[locale]/get-started/nft/page.js",
+  "/[locale]/get-started/page": "app/[locale]/get-started/page.js",
+  "/[locale]/genesis/page": "app/[locale]/genesis/page.js",
+  "/[locale]/get-started/token/page": "app/[locale]/get-started/token/page.js",
+  "/[locale]/network/page": "app/[locale]/network/page.js",
+  "/[locale]/page": "app/[locale]/page.js",
+  "/[locale]/docs/page": "app/[locale]/docs/page.js",
+  "/[locale]/get-started/whitepaper/page": "app/[locale]/get-started/whitepaper/page.js",
+  "/[locale]/verify/page": "app/[locale]/verify/page.js",
+  "/[locale]/practice/page": "app/[locale]/practice/page.js"
+}

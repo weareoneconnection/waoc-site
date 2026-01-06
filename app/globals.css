@@ -1,0 +1,34 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* -----------------------------
+   WAOC Classic Tokens (bitcoin-like, warm off-white)
+------------------------------ */
+:root{
+  --bg: 250 249 246;        /* 奶白 */
+  --panel: 255 255 255;     /* 卡片白 */
+  --text: 18 18 18;         /* 深灰黑 */
+  --muted: 102 102 102;     /* 次级灰 */
+  --border: 227 227 227;    /* 边框浅灰 */
+  --shadow: 0 10px 30px rgba(0,0,0,.06);
+
+  /* WAOC warm accent（少用） */
+  --accent: 186 127 73;     /* 暖棕金 */
+  --accent-2: 236 210 170;  /* 浅暖金 */
+}
+
+html, body { height: 100%; }
+body{
+  background: rgb(var(--bg));
+  color: rgb(var(--text));
+}
+
+/* 链接统一（避免默认蓝紫色） */
+a{ color: inherit; text-decoration: none; }
+a:hover{ text-decoration: none; }
+
+/* 选中文本更柔和 */
+::selection{
+  background: rgba(186,127,73,.22);
+}

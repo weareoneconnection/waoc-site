@@ -1,0 +1,63 @@
+{
+  "home": {
+    "hero": {
+      "title": "WAOC 是一项长期努力，旨在重建信任、协作与人与人之间的连接。",
+      "subtitle": "通过透明且可核验的链上系统实现。",
+      "ctaPrimary": { "label": "开始了解 WAOC", "href": "/zh/docs" },
+      "ctaSecondary": { "label": "验证官方链接", "href": "/zh/verify" },
+      "ctaTertiary": { "label": "了解生态结构", "href": "/zh/docs" }
+    },
+    "overview": {
+      "title": "快速了解",
+      "cards": {
+        "participants": {
+          "title": "参与者",
+          "desc": "了解个人如何参与并为 WAOC 网络贡献力量。",
+          "href": "/zh/docs"
+        },
+        "builders": {
+          "title": "建设者",
+          "desc": "了解开发者与协作者如何基于 WAOC 的开放基础设施进行构建。",
+          "href": "/zh/docs"
+        },
+        "community": {
+          "title": "社区",
+          "desc": "了解集体治理与协作机制如何在 WAOC 中形成与运作。",
+          "href": "/zh/community"
+        }
+      }
+    },
+    "why": {
+      "title": "为什么需要 WAOC",
+      "p1": "WAOC 并非由某一种资产或应用所定义。它代表一种长期努力，旨在在日益碎片化的世界中重建信任、协作与连接。",
+      "p2": "WAOC 以透明且可核验的链上系统为基础，尝试使技术与人类价值相协调，从而在长期尺度上促进协作、相互理解与共同责任。"
+    },
+    "ecosystem": {
+      "title": "WAOC 生态结构",
+      "items": {
+        "network": {
+          "title": "WAOC 网络",
+          "desc": "作为公共链上层，支持信任、协作与集体参与。",
+          "href": "/zh/docs"
+        },
+        "identity": {
+          "title": "起源与身份",
+          "desc": "作为历史与象征层，记录起点、参与与延续。",
+          "href": "/zh/nft"
+        },
+        "practice": {
+          "title": "实践与觉察",
+          "desc": "支持反思、觉察与长期对齐的工具与实践。",
+          "href": "/zh/meditation"
+        }
+      }
+    },
+    "verify": {
+      "title": "参与前请先验证",
+      "lead": "在任何操作前，请先核验官方合约与链接。",
+      "notice": "WAOC 不会主动私信你，也不会索要助记词或私钥。",
+      "cta": { "label": "进入验证中心", "href": "/zh/verify" },
+      "secondary": { "label": "阅读文档", "href": "/zh/docs" }
+    }
+  }
+}

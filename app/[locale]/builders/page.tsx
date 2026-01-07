@@ -56,9 +56,119 @@ function Pill({ children }: { children: React.ReactNode }) {
   );
 }
 
-export default function BuildersPage({ params }: { params: { locale: string } }) {
-  const locale = (params?.locale || "en").toLowerCase();
-  const base = `/${locale.startsWith("zh") ? "zh" : "en"}`;
+export default async function BuildersPage({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}) {
+  const { locale } = await params;
+  const lang = (locale || "en").toLowerCase();
+  const isZH = lang.startsWith("zh");
+  const base = `/${isZH ? "zh" : "en"}`;
+
+  // ✅ 仅补充：中英文文案字典（不动结构）
+  const copy = {
+    en: {
+      badges: ["Builders", "Open Infrastructure", "Proof of Work (Soon)"],
+      title: "Builders",
+      hero:
+        "Build with WAOC’s open infrastructure. We favor small, shippable contributions that compound into a living network—transparent, verifiable, and community-owned.",
+      buttons: {
+        readDocs: "Read Docs",
+        verifyFirst: "Verify First",
+        connect: "Connect",
+      },
+      ship: {
+        title: "What builders ship",
+        pills: [
+          "Onboarding pages",
+          "Verification UX",
+          "Community tools",
+          "Visual network map",
+          "Mini-apps & experiments",
+        ],
+        desc:
+          "Start small: improve one page, clarify one flow, or ship one component. We track contributions and will later attach verifiable badges (NFT/SBT).",
+      },
+      lanes: {
+        product: {
+          title: "Product & UX",
+          desc: "Make the site feel trustworthy and effortless.",
+          bullets: [
+            "• Navigation & information architecture",
+            "• Verify-center clarity & anti-scam UX",
+            "• Mobile polish & performance",
+          ],
+        },
+        engineering: {
+          title: "Engineering",
+          desc: "Build components & integrations that scale.",
+          bullets: [
+            "• Directory / filters / search",
+            "• On-chain reads (later)",
+            "• CI & deployment hygiene",
+          ],
+        },
+        content: {
+          title: "Content & Ops",
+          desc: "Turn ideology into a daily, living system.",
+          bullets: [
+            "• Threads / announcements",
+            "• Community playbooks",
+            "• Event templates & localization",
+          ],
+        },
+      },
+      cta: {
+        title: "Ready to build?",
+        desc: "Pick a lane, ship one improvement, then share it with the community.",
+        startFromDocs: "Start from Docs",
+        seeNetwork: "See the Network",
+      },
+    },
+    zh: {
+      badges: ["建设者", "开放基础设施", "工作量证明（即将上线）"],
+      title: "建设者",
+      hero:
+        "基于 WAOC 的开放基础设施进行构建。我们鼓励“小而可交付”的贡献，持续叠加成一个可验证、透明、由社区共同拥有的活网络。",
+      buttons: {
+        readDocs: "阅读文档",
+        verifyFirst: "先验证",
+        connect: "连接",
+      },
+      ship: {
+        title: "建设者交付什么",
+        pills: ["引导页面", "验证体验", "社区工具", "可视化网络地图", "小应用与实验"],
+        desc:
+          "从小处开始：优化一个页面、澄清一个流程、或交付一个组件。我们会记录贡献，并在后续绑定可验证徽章（NFT/SBT）。",
+      },
+      lanes: {
+        product: {
+          title: "产品与体验",
+          desc: "让网站更可信、更省心、更好用。",
+          bullets: ["• 导航与信息架构", "• 验证中心清晰度与反诈骗体验", "• 移动端细节与性能优化"],
+        },
+        engineering: {
+          title: "工程开发",
+          desc: "构建可扩展的组件与集成能力。",
+          bullets: ["• 目录 / 筛选 / 搜索", "• 链上读取（后续）", "• CI 与部署规范"],
+        },
+        content: {
+          title: "内容与运营",
+          desc: "把理念变成可持续的日常系统。",
+          bullets: ["• Thread / 公告发布", "• 社区运营手册", "• 活动模板与本地化"],
+        },
+      },
+      cta: {
+        title: "准备开始构建？",
+        desc: "选择一个方向，交付一个改进，然后分享给社区。",
+        startFromDocs: "从文档开始",
+        seeNetwork: "查看网络",
+      },
+    },
+  } as const;
+
+  const t = isZH ? copy.zh : copy.en;
 
   return (
     <main className="relative">
@@ -68,18 +178,17 @@ export default function BuildersPage({ params }: { params: { locale: string } })
           {/* Hero */}
           <div className="max-w-3xl">
             <div className="flex flex-wrap gap-2">
-              <Badge>Builders</Badge>
-              <Badge>Open Infrastructure</Badge>
-              <Badge>Proof of Work (Soon)</Badge>
+              <Badge>{t.badges[0]}</Badge>
+              <Badge>{t.badges[1]}</Badge>
+              <Badge>{t.badges[2]}</Badge>
             </div>
 
             <h1 className="mt-5 text-4xl font-semibold tracking-tight text-black/90 md:text-5xl">
-              Builders
+              {t.title}
             </h1>
 
             <p className="mt-4 text-base leading-relaxed text-black/60 md:text-lg">
-              Build with WAOC’s open infrastructure. We favor small, shippable contributions that compound into a living
-              network—transparent, verifiable, and community-owned.
+              {t.hero}
             </p>
 
             <div className="mt-6 flex flex-wrap gap-3">
@@ -87,71 +196,57 @@ export default function BuildersPage({ params }: { params: { locale: string } })
                 href={`${base}/docs`}
                 className="rounded-xl border border-black/10 bg-black px-4 py-2.5 text-sm font-medium text-white shadow-sm transition hover:opacity-90"
               >
-                Read Docs
+                {t.buttons.readDocs}
               </Link>
               <Link
                 href={`${base}/verify`}
                 className="rounded-xl border border-black/10 bg-white/70 px-4 py-2.5 text-sm font-medium text-black/80 shadow-sm backdrop-blur transition hover:bg-white"
               >
-                Verify First
+                {t.buttons.verifyFirst}
               </Link>
               <Link
                 href={`${base}/connect`}
                 className="rounded-xl border border-black/10 bg-white/70 px-4 py-2.5 text-sm font-medium text-black/80 shadow-sm backdrop-blur transition hover:bg-white"
               >
-                Connect
+                {t.buttons.connect}
               </Link>
             </div>
           </div>
 
           {/* What to build */}
           <div className="mt-10 rounded-2xl border border-black/10 bg-white/60 p-6 shadow-[0_10px_30px_rgba(0,0,0,0.04)] backdrop-blur">
-            <div className="text-lg font-semibold text-black/85">What builders ship</div>
+            <div className="text-lg font-semibold text-black/85">{t.ship.title}</div>
             <div className="mt-2 flex flex-wrap gap-2">
-              <Pill>Onboarding pages</Pill>
-              <Pill>Verification UX</Pill>
-              <Pill>Community tools</Pill>
-              <Pill>Visual network map</Pill>
-              <Pill>Mini-apps & experiments</Pill>
+              {t.ship.pills.map((p) => (
+                <Pill key={p}>{p}</Pill>
+              ))}
             </div>
-            <p className="mt-4 text-sm text-black/60">
-              Start small: improve one page, clarify one flow, or ship one component. We track contributions and will
-              later attach verifiable badges (NFT/SBT).
-            </p>
+            <p className="mt-4 text-sm text-black/60">{t.ship.desc}</p>
           </div>
 
           {/* Builder lanes */}
           <div className="mt-10 grid gap-5 lg:grid-cols-3">
-            <Card
-              title="Product & UX"
-              desc="Make the site feel trustworthy and effortless."
-            >
+            <Card title={t.lanes.product.title} desc={t.lanes.product.desc}>
               <ul className="space-y-2 text-sm text-black/65">
-                <li>• Navigation & information architecture</li>
-                <li>• Verify-center clarity & anti-scam UX</li>
-                <li>• Mobile polish & performance</li>
+                {t.lanes.product.bullets.map((s) => (
+                  <li key={s}>{s}</li>
+                ))}
               </ul>
             </Card>
 
-            <Card
-              title="Engineering"
-              desc="Build components & integrations that scale."
-            >
+            <Card title={t.lanes.engineering.title} desc={t.lanes.engineering.desc}>
               <ul className="space-y-2 text-sm text-black/65">
-                <li>• Directory / filters / search</li>
-                <li>• On-chain reads (later)</li>
-                <li>• CI & deployment hygiene</li>
+                {t.lanes.engineering.bullets.map((s) => (
+                  <li key={s}>{s}</li>
+                ))}
               </ul>
             </Card>
 
-            <Card
-              title="Content & Ops"
-              desc="Turn ideology into a daily, living system."
-            >
+            <Card title={t.lanes.content.title} desc={t.lanes.content.desc}>
               <ul className="space-y-2 text-sm text-black/65">
-                <li>• Threads / announcements</li>
-                <li>• Community playbooks</li>
-                <li>• Event templates & localization</li>
+                {t.lanes.content.bullets.map((s) => (
+                  <li key={s}>{s}</li>
+                ))}
               </ul>
             </Card>
           </div>
@@ -160,23 +255,21 @@ export default function BuildersPage({ params }: { params: { locale: string } })
           <div className="mt-10 rounded-2xl border border-black/10 bg-white/60 p-6 shadow-[0_10px_30px_rgba(0,0,0,0.04)] backdrop-blur">
             <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
               <div>
-                <div className="text-lg font-semibold text-black/85">Ready to build?</div>
-                <div className="mt-1 text-sm text-black/60">
-                  Pick a lane, ship one improvement, then share it with the community.
-                </div>
+                <div className="text-lg font-semibold text-black/85">{t.cta.title}</div>
+                <div className="mt-1 text-sm text-black/60">{t.cta.desc}</div>
               </div>
               <div className="flex flex-wrap gap-3">
                 <Link
                   href={`${base}/docs`}
                   className="rounded-xl border border-black/10 bg-black px-4 py-2.5 text-sm font-medium text-white shadow-sm transition hover:opacity-90"
                 >
-                  Start from Docs
+                  {t.cta.startFromDocs}
                 </Link>
                 <Link
                   href={`${base}/network`}
                   className="rounded-xl border border-black/10 bg-white/70 px-4 py-2.5 text-sm font-medium text-black/80 shadow-sm backdrop-blur transition hover:bg-white"
                 >
-                  See the Network
+                  {t.cta.seeNetwork}
                 </Link>
               </div>
             </div>

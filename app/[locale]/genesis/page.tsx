@@ -94,9 +94,14 @@ function Row({
   );
 }
 
-export default function GenesisPage({ params }: { params: { locale: string } }) {
-  const locale = (params?.locale || "en").toLowerCase();
-  const isZH = locale.startsWith("zh");
+export default async function GenesisPage({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}) {
+  const { locale } = await params;
+  const lang = (locale || "en").toLowerCase();
+  const isZH = lang.startsWith("zh");
   const base = `/${isZH ? "zh" : "en"}`;
 
   // 你项目里已存在的链接（你之前给过）

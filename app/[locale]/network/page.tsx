@@ -1,3 +1,4 @@
+import React from "react";
 import Link from "next/link";
 
 function Container({ children }: { children: React.ReactNode }) {
@@ -61,9 +62,16 @@ function Stat({ k, v }: { k: string; v: string }) {
 
 type Params = { locale: string };
 
-export default function NetworkPage({ params }: { params: Params }) {
+export default async function NetworkPage({
+  params,
+}: {
+  params: Promise<Params>;
+}) {
+  // ✅ Next 15: params 是 Promise，需要 await
+  const { locale } = await params;
+
   // ✅ 默认英文：只要不是 zh，就走 en
-  const lang = (params?.locale || "en").toLowerCase();
+  const lang = (locale || "en").toLowerCase();
   const isZH = lang.startsWith("zh");
 
   const t = isZH

@@ -48,7 +48,6 @@ function TopBar({ locale }: { locale: string }) {
         <div className="flex h-16 items-center justify-between">
           {/* Brand */}
           <Link href={`/${locale}`} className="flex items-center gap-3">
-            {/* ✅ 仅替换这里：占位方块 → SVG Logo（不改结构） */}
             <div className="relative h-9 w-9 overflow-hidden rounded-xl border border-border bg-panel shadow-soft">
               <Image
                 src="/logo/waoc-logo.svg"
@@ -60,7 +59,9 @@ function TopBar({ locale }: { locale: string }) {
             </div>
 
             <div className="leading-tight">
-              <div className="text-[11px] tracking-[0.28em] text-muted">WAOC</div>
+              <div className="text-[11px] tracking-[0.28em] text-muted">
+                WAOC
+              </div>
               <div className="text-[15px] font-semibold text-text">
                 We Are One Connection
               </div>
@@ -170,6 +171,7 @@ function SectionTitle({ title, subtitle }: { title: string; subtitle?: string })
   );
 }
 
+/** ✅ 升级版 Card：整卡可点 + 更精致 hover + 右上角徽章块 */
 function Card({
   title,
   desc,
@@ -182,16 +184,28 @@ function Card({
   learnMore: string;
 }) {
   return (
-    <div className="rounded-2xl border border-border bg-panel p-6 shadow-soft">
-      <div className="text-base font-semibold">{title}</div>
+    <Link
+      href={href}
+      className={[
+        "group block rounded-2xl border border-border bg-panel p-6 shadow-soft",
+        "transition-all duration-200",
+        "hover:bg-white/60 hover:shadow-[0_16px_46px_rgba(0,0,0,0.08)]",
+        "hover:-translate-y-0.5",
+        "focus:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(182,129,78,0.45)]",
+      ].join(" ")}
+    >
+     <div className="text-base font-semibold text-text">{title}</div>
+
+
       <p className="mt-3 text-sm leading-6 text-muted">{desc}</p>
-      <Link
-        href={href}
-        className="mt-5 inline-flex items-center gap-2 text-sm font-medium text-text hover:opacity-80"
-      >
-        {learnMore} <span aria-hidden>→</span>
-      </Link>
-    </div>
+
+      <div className="mt-5 inline-flex items-center gap-2 text-sm font-semibold text-text">
+        {learnMore}
+        <span aria-hidden className="transition group-hover:translate-x-0.5">
+          →
+        </span>
+      </div>
+    </Link>
   );
 }
 
@@ -208,7 +222,9 @@ export default async function HomePage({
     heroTitle: isZh
       ? "WAOC 是一项长期努力，用透明可验证的链上系统，重建信任、协作与人与人的连接。"
       : "WAOC is a long-term effort to restore trust, coordination, and human connection.",
-    heroSub: isZh ? "通过透明且可验证的链上系统。" : "Through transparent and verifiable on-chain systems.",
+    heroSub: isZh
+      ? "通过透明且可验证的链上系统。"
+      : "Through transparent and verifiable on-chain systems.",
 
     cta1: isZh ? "开始了解 WAOC" : "Get started with WAOC",
     cta2: isZh ? "核验官方链接" : "Verify official links",
@@ -281,27 +297,52 @@ export default async function HomePage({
               {copy.heroSub}
             </p>
 
-            <div className="mt-10 flex flex-col gap-3 sm:flex-row sm:items-center">
-              <Link
-                href={L("/get-started")}
-                className="inline-flex justify-center rounded-md bg-accent px-6 py-3 text-sm font-semibold text-bg shadow-soft hover:opacity-95"
-              >
-                {copy.cta1}
-              </Link>
+            {/* ✅ Hero CTA 升级：官方入口模块 + Explore 指向 #ecosystem */}
+            <div className="mt-10 rounded-2xl border border-border bg-panel/70 p-4 shadow-soft backdrop-blur">
+              <div className="px-2 pb-3 text-xs font-medium text-muted">
+                {isZh ? "推荐路径：" : "Recommended path:"}{" "}
+                <span className="text-text/80">
+                  {isZh ? "核验 → 了解 → 参与" : "Verify → Learn → Participate"}
+                </span>
+              </div>
 
-              <Link
-                href={L("/verify")}
-                className="inline-flex justify-center rounded-md border border-border bg-panel px-6 py-3 text-sm font-semibold text-text shadow-soft hover:shadow"
-              >
-                {copy.cta2}
-              </Link>
+              <div className="grid gap-3 sm:grid-cols-3">
+                <Link
+                  href={L("/get-started")}
+                  className="group inline-flex items-center justify-center rounded-xl bg-accent px-6 py-3 text-sm font-semibold text-bg shadow-soft transition hover:opacity-95"
+                >
+                  {copy.cta1}
+                  <span className="ml-2 inline-block transition group-hover:translate-x-0.5">
+                    →
+                  </span>
+                </Link>
 
-              <Link
-                href={L("/docs")}
-                className="inline-flex justify-center rounded-md border border-border bg-panel px-6 py-3 text-sm font-semibold text-text shadow-soft hover:shadow"
-              >
-                {copy.cta3}
-              </Link>
+                <Link
+                  href={L("/verify")}
+                  className="group inline-flex items-center justify-center rounded-xl border border-border bg-panel px-6 py-3 text-sm font-semibold text-text shadow-soft transition hover:bg-white/60 hover:shadow"
+                >
+                  {copy.cta2}
+                  <span className="ml-2 inline-block transition group-hover:translate-x-0.5">
+                    →
+                  </span>
+                </Link>
+
+                <Link
+                  href={`${L("")}#ecosystem`}
+                  className="group inline-flex items-center justify-center rounded-xl border border-border bg-panel px-6 py-3 text-sm font-semibold text-text shadow-soft transition hover:bg-white/60 hover:shadow"
+                >
+                  {copy.cta3}
+                  <span className="ml-2 inline-block transition group-hover:translate-x-0.5">
+                    →
+                  </span>
+                </Link>
+              </div>
+
+              <div className="mt-3 px-2 text-xs text-muted">
+                {isZh
+                  ? "WAOC 不会私信索取助记词或私钥。请以 Verify 为准。"
+                  : "WAOC will never DM you for seed phrases or private keys. Treat Verify as source of truth."}
+              </div>
             </div>
           </div>
         </Container>
@@ -346,7 +387,7 @@ export default async function HomePage({
       </div>
 
       {/* ECOSYSTEM */}
-      <div className="py-14">
+      <div id="ecosystem" className="py-14 scroll-mt-24">
         <Container>
           <SectionTitle title={copy.ecoTitle} />
           <div className="grid gap-6 md:grid-cols-3">

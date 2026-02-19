@@ -171,7 +171,7 @@ function SectionTitle({ title, subtitle }: { title: string; subtitle?: string })
   );
 }
 
-/** ✅ 升级版 Card：整卡可点 + 更精致 hover + 右上角徽章块 */
+/** ✅ Card：整卡可点 + 更精致 hover */
 function Card({
   title,
   desc,
@@ -194,9 +194,7 @@ function Card({
         "focus:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(182,129,78,0.45)]",
       ].join(" ")}
     >
-     <div className="text-base font-semibold text-text">{title}</div>
-
-
+      <div className="text-base font-semibold text-text">{title}</div>
       <p className="mt-3 text-sm leading-6 text-muted">{desc}</p>
 
       <div className="mt-5 inline-flex items-center gap-2 text-sm font-semibold text-text">
@@ -206,6 +204,358 @@ function Card({
         </span>
       </div>
     </Link>
+  );
+}
+
+/** =========================
+ *  LIVE PROTOCOL (ALL-TIME only)
+ *  ========================= */
+type LeaderRow = {
+  wallet: string;
+  points: number;
+  completed: number;
+  updatedAt?: number;
+};
+type LeaderboardResponse = {
+  ok: boolean;
+  period: string;
+  periodKey: string;
+  participants: number;
+  top1: LeaderRow | null;
+  rows: LeaderRow[];
+};
+
+function shortWallet(w: string) {
+  const s = (w || "").trim();
+  if (!s) return "—";
+  if (s.length <= 10) return s;
+  return `${s.slice(0, 4)}…${s.slice(-4)}`;
+}
+
+function fmtInt(n: number) {
+  if (!Number.isFinite(n)) return "—";
+  const x = Math.max(0, Math.trunc(n));
+  if (x >= 1_000_000_000) return `${(x / 1_000_000_000).toFixed(1)}B`;
+  if (x >= 1_000_000) return `${(x / 1_000_000).toFixed(1)}M`;
+  if (x >= 1_000) return `${(x / 1_000).toFixed(1)}K`;
+  return String(x);
+}
+
+function relTimeFromUnixMs(ms?: number) {
+  const t = Number(ms || 0);
+  if (!t || !Number.isFinite(t)) return null;
+  const diff = Date.now() - t;
+  if (diff < 0) return "just now";
+  const sec = Math.floor(diff / 1000);
+  if (sec < 10) return "just now";
+  if (sec < 60) return `${sec}s ago`;
+  const min = Math.floor(sec / 60);
+  if (min < 60) return `${min}m ago`;
+  const hr = Math.floor(min / 60);
+  if (hr < 24) return `${hr}h ago`;
+  const day = Math.floor(hr / 24);
+  return `${day}d ago`;
+}
+
+async function fetchLeaderboardAllTime(): Promise<LeaderboardResponse | null> {
+  // ✅ 你可以在官网项目里配置：ONE_MISSION_BASE_URL=https://one-mission.vercel.app
+  function normalizeBaseUrl(u: string) {
+  const s = String(u || "").trim().replace(/\/$/, "");
+  if (!s) return "https://one-mission.vercel.app";
+  if (s.startsWith("http://") || s.startsWith("https://")) return s;
+  return `https://${s}`; // ✅ 自动补协议，避免相对路径
+}
+
+const oneMissionBase = normalizeBaseUrl(
+  process.env.ONE_MISSION_BASE_URL || "https://one-mission.vercel.app"
+);
+
+  const url = `${oneMissionBase}/api/leaderboard?period=all&sort=points&order=desc&limit=7`;
+
+  try {
+    const res = await fetch(url, {
+      // ✅ 降压：缓存 60 秒
+      next: { revalidate: 60 },
+      headers: { Accept: "application/json" },
+    });
+    if (!res.ok) return null;
+    const data = (await res.json()) as any;
+    if (!data?.ok) return null;
+
+    return {
+      ok: true,
+      period: String(data.period || "all"),
+      periodKey: String(data.periodKey || "all"),
+      participants: Number(data.participants || 0),
+      top1: (data.top1 || null) as LeaderRow | null,
+      rows: Array.isArray(data.rows) ? (data.rows as LeaderRow[]) : [],
+    };
+  } catch {
+    return null;
+  }
+}
+
+function LiveDot() {
+  return (
+    <span className="inline-flex items-center gap-2">
+      <span className="relative flex h-2.5 w-2.5">
+        <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400/60 opacity-60" />
+        <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-emerald-500" />
+      </span>
+      <span className="text-xs font-semibold tracking-[0.18em] text-neutral-700">
+        LIVE
+      </span>
+    </span>
+  );
+}
+
+function MiniPill({ children }: { children: React.ReactNode }) {
+  return (
+    <span className="inline-flex items-center rounded-full border border-border bg-panel px-3 py-1.5 text-xs font-semibold text-neutral-700 shadow-soft">
+      {children}
+    </span>
+  );
+}
+
+async function LiveProtocol({
+  locale,
+  isZh,
+}: {
+  locale: string;
+  isZh: boolean;
+}) {
+  const L = (path: string) => `/${locale}${path}`;
+
+  const data = await fetchLeaderboardAllTime();
+  const participants = data?.participants ?? 0;
+  const top1 = data?.top1 ?? null;
+  const updated = relTimeFromUnixMs(top1?.updatedAt);
+
+  // ✅ 不新增 network：用你现有页面路径（如果你有 /network/leaderboard 就跳那里；否则直接去 one-mission）
+  // ✅ One Mission base url (auto-fix missing https)
+function normalizeBaseUrl(u: string) {
+  const s = String(u || "").trim().replace(/\/$/, "");
+  if (!s) return "https://one-mission.vercel.app";
+  if (s.startsWith("http://") || s.startsWith("https://")) return s;
+  return `https://${s}`;
+}
+
+const oneMissionBase = normalizeBaseUrl(
+  process.env.ONE_MISSION_BASE_URL || "https://one-mission.vercel.app"
+);
+
+// ✅ 不新增 network：直接去 one-mission
+const runHref = `${oneMissionBase}/`;
+const boardHref = `${oneMissionBase}/mission/leaderboard`;
+
+
+  return (
+    <div className="py-10 md:py-12">
+      <Container>
+        <div className="rounded-2xl border border-border bg-panel p-6 shadow-soft">
+          {/* Header */}
+          <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+            <div>
+              <div className="flex items-center gap-3">
+                <LiveDot />
+                <div className="text-sm font-semibold text-text">
+                  {isZh ? "实时协议" : "LIVE PROTOCOL"}
+                </div>
+              </div>
+
+              <p className="mt-2 max-w-2xl text-sm leading-6 text-muted">
+                {isZh
+                  ? "来自 WAOC 协作层的实时信号（对齐 One Mission 全量排行榜）。参与 → 声誉 → 身份。"
+                  : "Real-time signals from the WAOC coordination layer (aligned with One Mission all-time leaderboard). Participation → Reputation → Identity."}
+              </p>
+
+              <div className="mt-4 flex flex-wrap items-center gap-2">
+                <MiniPill>{isZh ? "All-time" : "All-time"}</MiniPill>
+                <MiniPill>{isZh ? "Reputation" : "Reputation"}</MiniPill>
+                <MiniPill>{isZh ? "On-chain ready" : "On-chain ready"}</MiniPill>
+
+                <span className="ml-1 text-xs text-muted">
+                  {isZh ? "Epoch" : "Epoch"}: {data?.periodKey || "all"} (UTC)
+                  {updated ? ` · ${isZh ? "更新" : "Updated"} ${updated}` : ""}
+                </span>
+              </div>
+            </div>
+
+            {/* CTAs */}
+            <div className="flex w-full flex-col gap-2 md:w-auto md:items-end">
+              <Link
+                href={runHref}
+                className="inline-flex items-center justify-center rounded-xl bg-text px-5 py-2.5 text-sm font-semibold text-bg shadow-soft hover:opacity-90"
+              >
+                {isZh ? "立即参与任务" : "Run a Mission"}
+                <span className="ml-2">→</span>
+              </Link>
+
+              {/* ✅ 不新增 network：直接跳 One Mission Leaderboard */}
+              <a
+                href={boardHref}
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex items-center justify-center rounded-xl border border-border bg-panel px-5 py-2.5 text-sm font-semibold text-text shadow-soft hover:bg-white/60 hover:shadow"
+              >
+                {isZh ? "查看完整排行榜" : "View Full Leaderboard"}
+                <span className="ml-2">→</span>
+              </a>
+            </div>
+          </div>
+
+          {/* KPI */}
+          <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            <div className="rounded-2xl border border-border bg-bg/60 p-4">
+              <div className="text-xs font-semibold text-muted">
+                {isZh ? "参与者" : "Contributors"}
+              </div>
+              <div className="mt-2 text-2xl font-semibold text-text">
+                {data ? fmtInt(participants) : "—"}
+              </div>
+              <div className="mt-1 text-xs text-muted">
+                {isZh ? "全量排行榜参与地址数" : "Participants on the all-time board"}
+              </div>
+            </div>
+
+            <div className="rounded-2xl border border-border bg-bg/60 p-4">
+              <div className="text-xs font-semibold text-muted">
+                {isZh ? "最高声誉" : "Top Reputation"}
+              </div>
+              <div className="mt-2 text-2xl font-semibold text-text">
+                {top1 ? fmtInt(top1.points) : "—"}
+              </div>
+              <div className="mt-1 text-xs text-muted">
+                {isZh ? "Top1 points（all-time）" : "Top1 points (all-time)"}
+              </div>
+            </div>
+
+            <div className="rounded-2xl border border-border bg-bg/60 p-4">
+              <div className="text-xs font-semibold text-muted">
+                {isZh ? "领跑者" : "Leader"}
+              </div>
+              <div className="mt-2 text-2xl font-semibold text-text">
+                {top1 ? shortWallet(top1.wallet) : "—"}
+              </div>
+              <div className="mt-1 text-xs text-muted">
+                {isZh ? "当前全量榜第一名" : "Top wallet on all-time"}
+              </div>
+            </div>
+
+            <div className="rounded-2xl border border-border bg-bg/60 p-4">
+              <div className="text-xs font-semibold text-muted">
+                {isZh ? "已完成任务" : "Missions Completed"}
+              </div>
+              <div className="mt-2 text-2xl font-semibold text-text">
+                {top1 ? fmtInt(top1.completed) : "—"}
+              </div>
+              <div className="mt-1 text-xs text-muted">
+                {isZh
+                  ? "展示 Top1 的 completed（后续可换总量统计）"
+                  : "Top1 completed (can be replaced by global stats later)"}
+              </div>
+            </div>
+          </div>
+
+          {/* Preview */}
+          <div className="mt-6 rounded-2xl border border-border bg-bg/50 p-4">
+            <div className="mb-3 flex items-center justify-between">
+              <div className="text-sm font-semibold text-text">
+                {isZh ? "排行榜预览（Top 5）" : "Leaderboard Preview (Top 5)"}
+              </div>
+              <a
+                href={`${boardHref}/leaderboard`}
+                target="_blank"
+                rel="noreferrer"
+                className="text-xs font-semibold text-neutral-800 hover:underline"
+              >
+                {isZh ? "打开 One Mission Leaderboard" : "Open One Mission Leaderboard"} →
+              </a>
+            </div>
+
+            {data && data.rows?.length ? (
+              <div className="divide-y divide-border/60">
+                {data.rows.slice(0, 5).map((r, idx) => (
+                  <a
+                    key={`${r.wallet}-${idx}`}
+                    href={`${boardHref}/leaderboard`}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="flex items-center justify-between gap-3 rounded-xl py-3 transition hover:bg-white/60"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="flex h-8 w-8 items-center justify-center rounded-full border border-border bg-panel text-xs font-semibold text-neutral-800">
+                        {idx + 1}
+                      </div>
+                      <div className="text-sm font-semibold text-neutral-900">
+                        {shortWallet(r.wallet)}
+                      </div>
+                    </div>
+
+                    <div className="flex items-end gap-6">
+                      <div className="text-right">
+                        <div className="text-sm font-semibold text-neutral-900">
+                          {fmtInt(r.points)} pts
+                        </div>
+                        <div className="text-xs text-muted">
+                          {isZh ? "积分" : "Points"}
+                        </div>
+                      </div>
+
+                      <div className="hidden sm:block text-right">
+                        <div className="text-sm font-semibold text-neutral-900">
+                          {fmtInt(r.completed)}
+                        </div>
+                        <div className="text-xs text-muted">
+                          {isZh ? "任务" : "Missions"}
+                        </div>
+                      </div>
+
+                      <span className="text-xs font-semibold text-neutral-800">
+                        {isZh ? "查看 →" : "View →"}
+                      </span>
+                    </div>
+                  </a>
+                ))}
+              </div>
+            ) : (
+              <div className="rounded-xl border border-border bg-panel p-4">
+                <div className="text-sm font-semibold text-text">
+                  {isZh ? "实时信号加载中…" : "Loading live signals…"}
+                </div>
+                <p className="mt-2 text-sm text-muted">
+                  {isZh
+                    ? "数据暂时不可用也没关系，你仍然可以进入系统开始任务。"
+                    : "If data is temporarily unavailable, you can still enter the system and run a mission."}
+                </p>
+                <div className="mt-4 flex flex-col gap-2 sm:flex-row">
+                  <Link
+                    href={runHref}
+                    className="inline-flex justify-center rounded-xl bg-text px-5 py-2.5 text-sm font-semibold text-bg shadow-soft hover:opacity-90"
+                  >
+                    {isZh ? "立即参与任务" : "Run a Mission"} →
+                  </Link>
+                  <a
+                    href={`${boardHref}/leaderboard`}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-flex justify-center rounded-xl border border-border bg-panel px-5 py-2.5 text-sm font-semibold text-text shadow-soft hover:bg-white/60"
+                  >
+                    {isZh ? "打开排行榜" : "Open Leaderboard"} →
+                  </a>
+                </div>
+              </div>
+            )}
+          </div>
+
+          <div className="mt-5 text-xs text-muted">
+            {isZh
+              ? "参与成为声誉，声誉沉淀为身份，身份塑造协作。"
+              : "Participation becomes reputation. Reputation becomes identity. Identity becomes coordination."}
+          </div>
+        </div>
+      </Container>
+    </div>
   );
 }
 
@@ -297,7 +647,7 @@ export default async function HomePage({
               {copy.heroSub}
             </p>
 
-            {/* ✅ Hero CTA 升级：官方入口模块 + Explore 指向 #ecosystem */}
+            {/* Hero CTA */}
             <div className="mt-10 rounded-2xl border border-border bg-panel/70 p-4 shadow-soft backdrop-blur">
               <div className="px-2 pb-3 text-xs font-medium text-muted">
                 {isZh ? "推荐路径：" : "Recommended path:"}{" "}
@@ -347,6 +697,13 @@ export default async function HomePage({
           </div>
         </Container>
       </div>
+
+      {/* LIVE PROTOCOL (ALL-TIME) */}
+      {/*
+        ✅ 不新增 network 页面：本模块直接拉 one-mission 全量榜数据
+        ✅ “完整榜单”按钮直接跳 one-mission /leaderboard
+      */}
+      <LiveProtocol locale={locale} isZh={isZh} />
 
       {/* QUICK OVERVIEW */}
       <div className="py-14 md:py-18">

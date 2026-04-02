@@ -46,7 +46,6 @@ function TopBar({ locale }: { locale: string }) {
     <header className="sticky top-0 z-40 w-full border-b border-border/80 bg-bg/70 backdrop-blur">
       <Container>
         <div className="flex h-16 items-center justify-between">
-          {/* Brand */}
           <Link href={`/${locale}`} className="flex items-center gap-3">
             <div className="relative h-9 w-9 overflow-hidden rounded-xl border border-border bg-panel shadow-soft">
               <Image
@@ -68,7 +67,6 @@ function TopBar({ locale }: { locale: string }) {
             </div>
           </Link>
 
-          {/* Desktop Nav */}
           <nav className="hidden md:flex items-center gap-2">
             {nav.map((item) => (
               <Link
@@ -96,9 +94,7 @@ function TopBar({ locale }: { locale: string }) {
             ))}
           </nav>
 
-          {/* Right Controls */}
           <div className="flex items-center gap-3">
-            {/* Language toggle */}
             <div className="hidden sm:inline-flex items-center rounded-full border border-border bg-panel p-1 shadow-soft">
               <Link
                 href="/en"
@@ -124,7 +120,6 @@ function TopBar({ locale }: { locale: string }) {
               </Link>
             </div>
 
-            {/* Mobile menu: simple dropdown */}
             <details className="relative md:hidden">
               <summary className="list-none cursor-pointer rounded-full border border-border bg-panel px-4 py-2 text-sm font-semibold text-text shadow-soft hover:shadow">
                 Menu
@@ -171,7 +166,6 @@ function SectionTitle({ title, subtitle }: { title: string; subtitle?: string })
   );
 }
 
-/** ✅ Card：整卡可点 + 更精致 hover */
 function Card({
   title,
   desc,
@@ -207,9 +201,43 @@ function Card({
   );
 }
 
-/** =========================
- *  LIVE PROTOCOL (ALL-TIME only)
- *  ========================= */
+function ExternalCard({
+  title,
+  desc,
+  href,
+  learnMore,
+}: {
+  title: string;
+  desc: string;
+  href: string;
+  learnMore: string;
+}) {
+  return (
+    <a
+      href={href}
+      target="_blank"
+      rel="noreferrer"
+      className={[
+        "group block rounded-2xl border border-border bg-panel p-6 shadow-soft",
+        "transition-all duration-200",
+        "hover:bg-white/60 hover:shadow-[0_16px_46px_rgba(0,0,0,0.08)]",
+        "hover:-translate-y-0.5",
+        "focus:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(182,129,78,0.45)]",
+      ].join(" ")}
+    >
+      <div className="text-base font-semibold text-text">{title}</div>
+      <p className="mt-3 text-sm leading-6 text-muted">{desc}</p>
+
+      <div className="mt-5 inline-flex items-center gap-2 text-sm font-semibold text-text">
+        {learnMore}
+        <span aria-hidden className="transition group-hover:translate-x-0.5">
+          →
+        </span>
+      </div>
+    </a>
+  );
+}
+
 type LeaderRow = {
   wallet: string;
   points: number;
@@ -258,23 +286,21 @@ function relTimeFromUnixMs(ms?: number) {
 }
 
 async function fetchLeaderboardAllTime(): Promise<LeaderboardResponse | null> {
-  // ✅ 你可以在官网项目里配置：ONE_MISSION_BASE_URL=https://one-mission.vercel.app
   function normalizeBaseUrl(u: string) {
-  const s = String(u || "").trim().replace(/\/$/, "");
-  if (!s) return "https://one-mission.vercel.app";
-  if (s.startsWith("http://") || s.startsWith("https://")) return s;
-  return `https://${s}`; // ✅ 自动补协议，避免相对路径
-}
+    const s = String(u || "").trim().replace(/\/$/, "");
+    if (!s) return "https://one-mission.vercel.app";
+    if (s.startsWith("http://") || s.startsWith("https://")) return s;
+    return `https://${s}`;
+  }
 
-const oneMissionBase = normalizeBaseUrl(
-  process.env.ONE_MISSION_BASE_URL || "https://one-mission.vercel.app"
-);
+  const oneMissionBase = normalizeBaseUrl(
+    process.env.ONE_MISSION_BASE_URL || "https://one-mission.vercel.app"
+  );
 
   const url = `${oneMissionBase}/api/leaderboard?period=all&sort=points&order=desc&limit=7`;
 
   try {
     const res = await fetch(url, {
-      // ✅ 降压：缓存 60 秒
       next: { revalidate: 60 },
       headers: { Accept: "application/json" },
     });
@@ -324,36 +350,29 @@ async function LiveProtocol({
   locale: string;
   isZh: boolean;
 }) {
-  const L = (path: string) => `/${locale}${path}`;
-
   const data = await fetchLeaderboardAllTime();
   const participants = data?.participants ?? 0;
   const top1 = data?.top1 ?? null;
   const updated = relTimeFromUnixMs(top1?.updatedAt);
 
-  // ✅ 不新增 network：用你现有页面路径（如果你有 /network/leaderboard 就跳那里；否则直接去 one-mission）
-  // ✅ One Mission base url (auto-fix missing https)
-function normalizeBaseUrl(u: string) {
-  const s = String(u || "").trim().replace(/\/$/, "");
-  if (!s) return "https://one-mission.vercel.app";
-  if (s.startsWith("http://") || s.startsWith("https://")) return s;
-  return `https://${s}`;
-}
+  function normalizeBaseUrl(u: string) {
+    const s = String(u || "").trim().replace(/\/$/, "");
+    if (!s) return "https://one-mission.vercel.app";
+    if (s.startsWith("http://") || s.startsWith("https://")) return s;
+    return `https://${s}`;
+  }
 
-const oneMissionBase = normalizeBaseUrl(
-  process.env.ONE_MISSION_BASE_URL || "https://one-mission.vercel.app"
-);
+  const oneMissionBase = normalizeBaseUrl(
+    process.env.ONE_MISSION_BASE_URL || "https://one-mission.vercel.app"
+  );
 
-// ✅ 不新增 network：直接去 one-mission
-const runHref = `${oneMissionBase}/`;
-const boardHref = `${oneMissionBase}/mission/leaderboard`;
-
+  const runHref = `${oneMissionBase}/`;
+  const boardHref = `${oneMissionBase}/mission/leaderboard`;
 
   return (
     <div className="py-10 md:py-12">
       <Container>
         <div className="rounded-2xl border border-border bg-panel p-6 shadow-soft">
-          {/* Header */}
           <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
             <div>
               <div className="flex items-center gap-3">
@@ -381,7 +400,6 @@ const boardHref = `${oneMissionBase}/mission/leaderboard`;
               </div>
             </div>
 
-            {/* CTAs */}
             <div className="flex w-full flex-col gap-2 md:w-auto md:items-end">
               <Link
                 href={runHref}
@@ -391,7 +409,6 @@ const boardHref = `${oneMissionBase}/mission/leaderboard`;
                 <span className="ml-2">→</span>
               </Link>
 
-              {/* ✅ 不新增 network：直接跳 One Mission Leaderboard */}
               <a
                 href={boardHref}
                 target="_blank"
@@ -404,7 +421,6 @@ const boardHref = `${oneMissionBase}/mission/leaderboard`;
             </div>
           </div>
 
-          {/* KPI */}
           <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
             <div className="rounded-2xl border border-border bg-bg/60 p-4">
               <div className="text-xs font-semibold text-muted">
@@ -457,7 +473,6 @@ const boardHref = `${oneMissionBase}/mission/leaderboard`;
             </div>
           </div>
 
-          {/* Preview */}
           <div className="mt-6 rounded-2xl border border-border bg-bg/50 p-4">
             <div className="mb-3 flex items-center justify-between">
               <div className="text-sm font-semibold text-text">
@@ -620,6 +635,11 @@ export default async function HomePage({
       ? "支持反思、觉察与长期对齐的工具与实践。"
       : "Tools and practices that support reflection, awareness, and long-term alignment.",
 
+    oneaiTitle: "OneAI",
+    oneaiDesc: isZh
+      ? "WAOC 生态中的 AI 协调引擎与智能体基础设施，连接意图、社区交互与执行系统。"
+      : "The AI coordination engine and agent infrastructure within the WAOC ecosystem, connecting intent, community interaction, and execution systems.",
+
     verifyTitle: isZh ? "参与前请先核验" : "Verify before you participate",
     verifyDesc: isZh
       ? "采取任何操作前，请务必核验官方合约与链接。\nWAOC 不会私信你，也不会索要助记词或私钥。"
@@ -647,7 +667,6 @@ export default async function HomePage({
               {copy.heroSub}
             </p>
 
-            {/* Hero CTA */}
             <div className="mt-10 rounded-2xl border border-border bg-panel/70 p-4 shadow-soft backdrop-blur">
               <div className="px-2 pb-3 text-xs font-medium text-muted">
                 {isZh ? "推荐路径：" : "Recommended path:"}{" "}
@@ -699,10 +718,6 @@ export default async function HomePage({
       </div>
 
       {/* LIVE PROTOCOL (ALL-TIME) */}
-      {/*
-        ✅ 不新增 network 页面：本模块直接拉 one-mission 全量榜数据
-        ✅ “完整榜单”按钮直接跳 one-mission /leaderboard
-      */}
       <LiveProtocol locale={locale} isZh={isZh} />
 
       {/* QUICK OVERVIEW */}
@@ -747,7 +762,7 @@ export default async function HomePage({
       <div id="ecosystem" className="py-14 scroll-mt-24">
         <Container>
           <SectionTitle title={copy.ecoTitle} />
-          <div className="grid gap-6 md:grid-cols-3">
+          <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
             <Card
               title={copy.nTitle}
               desc={copy.nDesc}
@@ -764,6 +779,12 @@ export default async function HomePage({
               title={copy.mTitle}
               desc={copy.mDesc}
               href={L("/practice")}
+              learnMore={copy.learnMore}
+            />
+            <ExternalCard
+              title={copy.oneaiTitle}
+              desc={copy.oneaiDesc}
+              href="https://oneai.network"
               learnMore={copy.learnMore}
             />
           </div>
